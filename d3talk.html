@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>D3 talk</title>
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+
+		<link rel="stylesheet" href="assets/css/reveal.css">
+		<link rel="stylesheet" href="assets/css/theme/custom.css" id="theme">
+		<link rel="stylesheet" href="assets/css/googlecode.css">
+		
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'assets/css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="assets/js/vendor/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<script src="assets/js/vendor/d3.min.js"></script>
+
+		<div class="reveal">
+
+			<div class="slides">
+
+				<section>
+					<h2>Data Visualization With D3.js</h2>
+					<br>
+					<br>
+					<h3>Yin Niu</h3>
+					<h5><a href="http://peachyo.github.io/d3talk.html">peachyo.github.io/d3talk.html</a></h5>
+					<h5><a href="http://bl.ocks.org/peachyo">bl.ocks.org/peachyo</a></h5>
+				</section>
+				<section>
+					<h2>Outline</h2>
+					<ul>
+						<li>Introduction</li>
+						<li>SVG Basics</li>
+						<li>Build a Simple Chart</li>
+						<li>Summary</li>
+						<li>Why Data visualization?</li>
+						<li>Q&A</li>
+					</ul>
+					<aside class="notes">
+					This webinar will cover the basics of using D3.js for data visualization and introduce you to some useful tools.  
+					</aside>
+				</section>
+				<section>
+					<section>
+						<h2>Introduction</h2>
+						<p><font color="green">D3 represents "Data-Driven Documents"</font></p>
+						<hr>
+						<ul>
+							<li>Developed by Mike Bostock</li>
+							<li>Visualizing data using HTML, SVG and CSS</li>
+							<li>Data-driven approach to DOM manipulation</li>
+							<li>Lots of examples on <a href="http://bl.ocks.org/mbostock">bl.ocks.org/mbostock</a></li>
+							<li>Display github Gist page on bl.ocks.org</li>
+						</ul>
+						<aside class="notes">
+						D3 uses existing standards HTML, SVG, which makes it compatible with existing tools. D3 constructs DOM from data and updates the DOM whenever data changes. 
+						</aside>
+					</section>
+					<section>
+						<h2>Gist & Blocks Demo</h2>
+						<aside class="notes">
+						Gist page allows you share code with others. bl.ocks.org provides viewer for your D3 code.
+						</aside>
+					</section>
+					<section>
+						<h2>How to create a block</h2>
+						<ol>
+							<li>Create a new Gist</li>
+							<li>Insert index.html file</li>
+							<li>Insert data file(csv, tsv, json)</li>
+							<li>Click "Create public Gist" button (or private)</li>
+							<li>Change url prefix from "https://gist.github.com" to 
+							"http://bl.ocks.org"</li>
+						</ol>
+					</section>
+					<section>
+						<h2>Add a thumbnail to your block</h2>
+						<ol>
+							<li>Clone the Gist to a local folder</li>
+							<li>Do a screen shot of your block and rename the file to "thumbnail.png"</li>
+							<li>Add the thumbnail file to local repository and push to github</li>
+						</ol>
+					</section>
+					<section>
+					<pre><code>
+git clone https://gist.github.com/dab8f470f7628ecf606a.git 
+(or git clone git@gist.github.com/dab8f470f7628ecf606a.git)
+cd dab8f470f7628ecf606a
+git add thumbnail.png
+git commit -m "Add thumbnail"
+git push
+					</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>SVG Basics</h2>
+						<p><font color="purple">SVG is short for Scalable Vector Graphics</font></p>
+						<hr>
+						<ul>
+							<li>Shapes are specified in XML, which is then rendered by SVG viewer</li>
+							<li>SVG graphics are resolution independent</li>
+							<li>DOM based API</li>
+							<li>Supported by IE9+, Chrome, Firefox, Safari</li>
+							<li>Great for icons, logos, 2D graphs and charts</li>
+						</ul>
+						<aside class="notes">
+						Although D3 can do a lot, it is mostly used to generate SVG graphics based on a set of data. If you are not familiar with SVG, it might be a little bit hard to understand the code. 
+
+						SVG graphics are defined as numbers instead of pixels. The viewer can scale the SVG images up and down in size without loss of quality which means, you can do full resolution graphical elements no matter what size screen, what zoom level and what resolution your user's device has.
+
+						DOM node based SVG API. 
+						-inspect SVG elements like other HTML elements.
+						-programatically manipulate shapes, styles and positions with javascript and CSS. 
+						-attach event handlers to SVG nodes 
+
+						If your rendering requires thousands of nodes, it's more performant to do the rendering in canvas (as the browser isn't having to create objects for every piece rendered, and also doesn't have to do the vector math required to render the object. Instead, it essentially paints mapped pixels.)
+						</aside>
+					</section>
+					<section>
+						<h2>SVG Coordinate System</h2>
+						<div align="left">
+						<p>The origin of the viewport is at the top/left with x-axis pointing to the right and y-axis pointing down</p>
+						</div>
+
+						<div id="coordinate"></div>
+
+						<script>
+var margin = {top: 100, right: 20, bottom: 20, left: 20},
+	width = 500-margin.left -margin.right,
+	height = 500 - margin.top - margin.bottom;
+
+var svg = d3.select("#coordinate").append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.append('svg:defs').append('svg:marker')
+    .attr('id', 'end-arrow')
+    .attr('viewBox', '0 -5 10 10')
+    .attr('refX', 6)
+    .attr('markerWidth', 10)
+    .attr('markerHeight', 10)
+    .attr('orient', 'auto')
+  .append('svg:path')
+    .attr('d', 'M0,-5L10,0L0,5')
+    .attr('fill', '#000');
+
+ svg.append("g").append("line")
+ .attr("x1",5)
+ .attr("y1",5)
+ .attr("x2",5)
+ .attr("y2",300)
+ .attr("class", "line")
+ .style('marker-end', 'url(#end-arrow)');
+
+svg.append("line")
+ .attr("x1",5)
+ .attr("y1",5)
+ .attr("x2",400)
+ .attr("y2",5)
+ .attr("stroke", "steelblue")
+ .attr("class", "line")
+ .style('marker-end', 'url(#end-arrow)');
+
+ svg.append("text")
+ 	.attr("x", 8)
+ 	.attr("y", 30)
+ 	.attr("font-size", "25px")
+ 	.attr("text-anchor", "right")
+ 	.attr("fill", "red")
+ 	.text("(0,0)");
+
+  svg.append("text")
+ 	.attr("x", 300)
+ 	.attr("y", 30)
+ 	.attr("font-size", "25px")
+ 	.attr("text-anchor", "right")
+ 	.attr("fill", "red")
+ 	.text("(300,0)");
+
+   svg.append("text")
+ 	.attr("x", 8)
+ 	.attr("y", 250)
+ 	.attr("font-size", "25px")
+ 	.attr("text-anchor", "right")
+ 	.attr("fill", "red")
+ 	.text("(0,200)");
+
+ svg.append("text")
+ 	.attr("x", 400)
+ 	.attr("y", 30)
+ 	.attr("font-size", "25px")
+ 	.attr("text-anchor", "right")
+ 	.attr("fill", "steelblue")
+ 	.text("x");
+
+ svg.append("text")
+ 	.attr("x", 20)
+ 	.attr("y", 300)
+ 	.attr("font-size", "25px")
+ 	.attr("text-anchor", "right")
+ 	.attr("fill", "steelblue")
+ 	.text("y");
+
+</script>
+						<aside class="notes">
+						The initial coordinates are at the top left corner. So when you draw a graph, you will actually need to flip the y axis value. 
+						</aside>
+					</section>
+					<section>
+						<h2>SVG Elements</h2>
+						<ul>
+							<li>Root element: <code>'svg'</code></li>
+							<li>Group element: <code>'g'</code></li>
+							<li>Define content for reuse: <code>'defs'</code></li>
+							<li>Shapes: <code>'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon'</code></li>
+							<li>Text: <code>'text'</code></li>
+							<li>Path: <code>'path'</code></li>
+						</ul>
+					</section>
+					<section>
+						<h2>SVG Elements - example</h2>
+						<code><pre>
+&ltsvg width="500" height="200"&gt
+  &ltg id="group1" fill="green"&gt
+    &ltrect x="50" y="50" width="200" height="20"/&gt
+    &ltcircle cx="350" cy="60" r="50"/&gt
+  &lt/g&gt
+
+  &ltdefs&gt
+    &ltlinearGradient id="Gradient01"&gt
+      &ltstop offset="20%" stop-color="#39F" /&gt
+      &ltstop offset="90%" stop-color="#F3F" /&gt
+    &lt/linearGradient&gt
+  &lt/defs&gt
+
+  &ltrect x="50" y="100" width="300" height="20" fill="url(#Gradient01)" /&gt
+  &ltrect x="50" y="150" width="300" height="20"
+        fill="none" stroke="pink" stroke-width="5px"/&gt
+&lt/svg&gt
+						</pre></code>
+					
+<svg width="500" height="200">
+  <g id="group1" fill="green">
+    <rect x="50" y="50" width="200" height="20"/>
+    <circle cx="350" cy="60" r="10"/>
+  </g>
+	<defs>
+    <linearGradient id="Gradient01">
+      <stop offset="20%" stop-color="#39F" />
+      <stop offset="90%" stop-color="#F3F" />
+    </linearGradient>
+  </defs>
+  <rect x="50" y="100" width="300" height="20" 
+        fill="url(#Gradient01)"  />
+  <!-- Show outline of canvas using 'rect' element -->
+  <rect x="50" y="150" width="300" height="20"
+        fill="none" stroke="pink" stroke-width="5px"/>
+</svg>
+						<aside class="notes">
+						The width and height defines the SVG viewport size. 
+						g groups elements together
+						Notice the defs are referenced using url(#id). 
+						You define rectangle using the start point and width, height
+						Cirles are defined with central point cooridnates and radius
+						</aside>
+					</section>
+					<section>
+						<h2>Path</h2>
+						<p>A path is defined by including a ‘path’ element which contains a d="(path data)" attribute, where the ‘d’ attribute contains the moveto, line, curve (both cubic and quadratic Béziers), arc and closepath instructions.</p>
+						<code><pre>
+&ltsvg width="190px" height="160px"&gt
+&ltpath d="M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80" stroke="purple" 
+  stroke-width="3" fill="transparent"/&gt
+&lt/svg&gt
+						</pre></code>
+						<div>
+							<svg width="190px" height="160px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  							<path d="M10 80 C 40 10, 65 10, 95 80 S 150 150, 180 80" stroke="purple" stroke-width="3" fill="none"/>
+							</svg>
+						</div>
+					</section>				
+					<section>
+						<h2>Styling</h2>
+						<ul>
+							<li>Same syntax as CSS</li>
+							<li>Sharing many styling properties with CSS: font, text</li>
+							<li>SVG specific properties: <code>'fill','opacity','stroke','stroke-width', 'shape-rendering', etc</code></li>
+						</ul>
+						<aside class="notes">
+						CSS doesn't introduce new representation. It is preferable to define a CSS class for style attributes instead of doing it in the javascript. 
+
+						The creator of SVG content might want to provide a hint about what tradeoffs to make as the browser renders <path> element or basic shapes. The shape-rendering attribute provides these hints.
+						</aside>
+					</section>
+					<section>
+						<h2>Transformation</h2>
+						<ul>
+							<li>Translate: move
+								<p><font color="steelblue">
+								<code>transform="translate(150,100)"</code></font></p>
+							</li>
+							<li>Scale: size up and down
+								<p><font color="steelblue">
+								<code>transform="scale(2)"</code></font></p>
+							</li>
+							<li>Rotate
+								<p><font color="steelblue">
+								<code>transform="rotate(90)"</code></font></p>
+							</li>
+						</ul>
+						<div>
+							<svg width="400px" height="400px">
+<!-- Establish a new coordinate system whose origin is at (200,40)
+       in the initial coord. system and which is scaled by 1.5. -->
+
+  <rect x="20" y="100" width="100" height="50" fill="none" stroke="#000" stroke-width="3"/>
+  <text x="0" y="80" font-size="20" font-family="Verdana" fill="#000" >
+      Original Position
+  </text>
+  <g transform="translate(150,100)">
+    <g transform="scale(1.5)">
+      <g fill="none" stroke="green" stroke-width="3" >
+      <rect x="50" y="50" width="100" height="50" />
+    </g>
+    </g>
+    <text x="70" y="50" font-size="20" font-family="Verdana" fill="#000" >
+      Translate + Scale
+      </text>
+  </g>
+  <!-- Establish a new coordinate system whose origin is at (50,30)
+       in the initial coord. system and which is rotated by 30 degrees. -->
+    <g transform="translate(50,100) rotate(30)">
+      <g fill="none" stroke="brown" stroke-width="3" >
+        <rect x="50" y="100" width="100" height="50" />
+      </g>
+      <text x="50" y="80" font-size="20" font-family="Verdana" fill="#000" >
+        Translate + Rotate
+      </text>
+    </g>
+    							<aside class="notes">
+    							transform is an SVG attribute. You will see "transform" a lot in D3 code, mostly uses the translate to move the coordinate system origin for elements. 
+
+    							there are other transform type such as matrix and skew which are less common and more complex to use. 
+    							</aside>
+
+							</svg>
+						</div>
+					</section>
+				</section>
+			<section>
+				<h2>D3.js</h2>	
+			</section>
+			<section>
+				<section>
+					<h2>Build a simple chart</h2>
+				</section>
+				<section>
+					<button class="button-chart">Toggle</button>
+					<div class="title"><h6>Top 20 Biggest Budget Movies</h6></div>
+					<div id="chart"></div>
+
+					<div><a href="http://bl.ocks.org/peachyo/38e8d842c984b261383a">View it on bl.ocks.org</a></div>
+<script>
+(function(){
+var margin = {top: 50, right: 80, bottom: 30, left: 40},
+	width = 960-margin.left -margin.right,
+	height = 500 - margin.top - margin.bottom;
+
+var x = d3.time.scale().range([0, width]),
+    y = d3.scale.linear().range([height, 0]),
+    c = d3.scale.category20(),
+    r = d3.scale.linear().range([5,50]),
+    xAxis = d3.svg.axis().scale(x).tickSize(3),
+    yAxis = d3.svg.axis().scale(y).ticks(4).orient("right");
+
+d3.select("button")
+    .on("click", clicked);
+
+
+var svg = d3.select("#chart").append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	svg.append("text")
+	  .attr("class", "title")
+      .attr("x", -20)
+      .attr("y", 50)
+      .attr("text-anchor", "start")
+      .text("Domestic Gross");
+
+var legend = svg.append("g")
+    .attr("class", "legend")
+    .attr("transform", "translate(" + 20 + "," + 120 + ")")
+  .selectAll("g")
+    .data([1e8, 5e8, 1e9])
+  .enter().append("g");
+
+
+var formatDate = d3.time.format("%m/%d/%Y");
+
+var toggle;
+
+var movies_data;
+	
+d3.csv("data/movies.csv", function(data) {
+
+	data.forEach(function(d){
+		d.date=formatDate.parse(d.date);
+		d.budget = +d.budget;
+		//convert string into number
+		d.domestic = +d.domestic;
+		d.world = +d.world;
+	});
+
+	var mindate = new Date(2006,1,1),
+        maxdate = new Date(2014,12,31);
+
+var minBudget = d3.min(data, function(d){ return d.budget;}),
+	maxBudget = d3.max(data, function(d){ return d.budget;}),
+	minDomestic = d3.min(data, function(d){ return d.domestic;}),
+	maxDomestic = d3.max(data, function(d){ return d.domestic;}),	
+	minWorld = d3.min(data, function(d){ return d.world;}),
+	maxWorld = d3.max(data, function(d){ return d.world;});
+
+x.domain([mindate, maxdate]);
+y.domain([minBudget*0.9, maxBudget*1.2]);
+r.domain([d3.min([minDomestic,minWorld]), d3.max([maxDomestic, maxWorld])]);
+	
+	legend.append("circle")
+    .attr("cy", function(d) { return -r(d); })
+    .attr("r", r);
+
+	legend.append("text")
+    .attr("y", function(d) { return -2 * r(d); })
+    .attr("dy", "1.3em")
+    .text(d3.format(".1s"));
+
+//define the data for the circle
+var elemEnter = svg.append("g").attr("class","circles")
+		.selectAll("circle").data(data).enter();
+
+	elemEnter.append("circle")
+		.attr("class", "bubble")
+		.attr("cx", function(d){ return x(d.date); })
+		.attr("cy", function(d){ return y(d.budget); })
+		.attr("r", function(d){ return r(d.domestic);})
+		.style("fill", function(d){ return c(d.domestic);});
+
+	elemEnter.append("text")
+      .attr("class", "label")
+      .attr("x", function(d){ return x(d.date)-5;})
+      .attr("y", function(d){ return y(d.budget)-10;})
+      .attr("text-anchor", "start")
+      .text(function(d){return d.movie;});
+
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis);
+	svg.append("g")
+		.attr("class", "y axis")
+		.attr("transform", "translate(" + width + ",0)")
+		.call(yAxis);
+
+		movies_data = data;
+});
+
+
+function clicked(){
+
+	toggle = !toggle;
+	if(toggle){
+		svg.select(".circles").selectAll("circle").data(movies_data).transition().ease("linear")
+		.attr("r", function(d){ return r(d.world);})
+		.style("fill", function(d){ return c(d.world);})
+		
+		svg.select("text")
+      	.attr("class", "title").transition().ease("linear")
+        .text("Worldwide Gross");
+	}
+	else{
+		svg.select(".circles").selectAll("circle").data(movies_data).transition().ease("linear")
+		.attr("r", function(d){ return r(d.domestic);})
+		.style("fill", function(d){ return c(d.domestic);})
+
+		svg.select("text")
+      	.attr("class", "title").transition().ease("linear")
+        .text("Domestic Gross");
+	}
+
+}
+})()
+</script>
+				</section>
+				<section>
+					<h2>The data - csv file</h2>
+
+					<pre><code>
+date,movie,budget,domestic,world
+12/18/2008,Avatar,425000000,760507625,2783918982
+5/24/2007,Pirates of the Caribbean: At World's End,300000000,309420425,960996492
+7/20/2012,The Dark Knight Rises,275000000,448139099,1079343943
+3/9/2012,John Carter,275000000,73058679,282778100
+7/2/2013,The Lone Ranger,275000000,89289910,259989910
+11/24/2010,Tangled,260000000,200821936,586581936
+5/4/2007,Spider-Man 3,258000000,336530303,890875303
+12/13/2013,The Hobbit: The Desolation of Smaug,250000000,258366855,950466855
+5/20/2011,Pirates of the Caribbean: On Stranger Tides,250000000,241063875,1043663875
+7/15/2009,Harry Potter and the Half-Blood Prince,250000000,301959197,934416487
+12/14/2012,The Hobbit: An Unexpected Journey,250000000,303003568,1014703568
+6/28/2006,Superman Returns,232000000,200120000,390874000
+11/14/2008,Quantum of Solace,230000000,169368427,591692078
+6/14/2013,Man of Steel,225000000,291045518,667999518
+7/7/2006,Pirates of the Caribbean: Dead Man's Chest,225000000,423315812,1060615812
+5/16/2008,The Chronicles of Narnia: Prince Caspian,225000000,141621490,419490286
+5/4/2012,Marvel's The Avengers,225000000,623279547,1514279547
+7/3/2012,The Amazing Spider-Man,220000000,262030663,757890267
+5/25/2012,Men in Black 3,215000000,179020854,624821154
+6/24/2009,Transformers: Revenge of the Fallen,210000000,402111870,836519699</code></pre>
+
+				</section>
+				<section>
+					<h2>Set up svg viewport</h2>
+					<pre><code>
+var margin = {top: 50, right: 80, bottom: 30, left: 40},
+    width = 960-margin.left -margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+					</code></pre>
+					<aside class="notes">
+					use developer tools to inspect elements
+
+					d3 uses selection to select elements. It works like CSS selector. 
+
+					d3.selectAll("")
+
+					Selections are arrays
+
+					append - create new elements
+					if one element selected, append will append one new element
+					if selectAll, append will create new element to each 
+					append returns a new selection
+
+					attr - set attributes, styles
+
+
+					</aside>
+				</section>
+				<section>
+					<h2>Set up scales and axes</h2>
+					<pre><code>
+var x = d3.time.scale().range([0, width]),
+    y = d3.scale.linear().range([height, 0]),
+    c = d3.scale.category20(),
+    r = d3.scale.linear().range([5,50]),
+    xAxis = d3.svg.axis().scale(x).tickSize(3),
+    yAxis = d3.svg.axis().scale(y).ticks(4).orient("right");
+
+					</code></pre>
+
+					<aside class="notes">
+					scales are used to compute attributes from data to generate visual encodings(position, color, etc)
+
+					time scale - time series
+
+					scale - linear, log, pow, sqrt, etc
+					ordinal, 
+					category20() predefined colors
+
+					range - size of the element
+
+					d3.svg.axis component
+
+					ticks - how many ticks on the axis, hint
+					ticksize - is the height of the tick
+
+					xAxis = d3.scale.linear().domain([12,24]).range([0,720]);
+
+					x(16); //240
+
+					domains are derived from data while ranges are constant
+
+					quantitative scales supports multiple interpolators
+
+					colors rgb interpolation
+					var x = d3.scale.linear([10,20]).range(["blue","red"]);
+					String interpolation matches embedded numbers
+					var x = d3.scale.linear([10,20]).range(["0px","200px"]);
+
+					var x = d3.scale.linear()
+    					.domain([12, 24])
+   						 .range(["steelblue", "brown"])
+    						.interpolate(d3.interpolateHsl);
+
+    				interpolate objects. used for transitions of complex data objects
+
+    				ordinal scale
+
+    				var x = d3.scale.category20()
+    				.domain(["A", "B", "C", "D"]);
+
+    				var x = d3.scale.ordinal()
+    				.domain(["A", "B", "C", "D"])
+    				.rangePoints([0, 720]);
+
+
+					</aside>
+				</section>
+				<section>
+					<h2>Load and parse the data</h2>
+					<code><pre>
+
+var formatDate = d3.time.format("%m/%d/%Y");
+
+d3.csv("movies.csv", function(data) {
+	data.forEach(function(d){
+		d.date=formatDate.parse(d.date);
+		d.budget = +d.budget;
+		d.domestic = +d.domestic;
+		d.world = +d.world;
+	});
+	...
+  }						
+					</pre></code>
+					<aside class="notes">
+					d3 uses data to create multiple elements 
+					data can be array or external files, file types can be csv, tsv or json
+
+					csv is untyped, so must convert from string to date and numbers. + operator converts string to number
+
+					json is typed, but you still need to parse date
+
+					code that depends on data must be invoked via callback
+					
+					</aside>
+				</section>
+
+				<section>
+					<h2>Calculate axes domain range from the data</h2>
+					<code><pre>
+  var minBudget = d3.min(data, function( d ) { return d.budget; }),
+	maxBudget = d3.max(data, function(d){ return d.budget;}),
+	minDomestic = d3.min(data, function(d){ return d.domestic;}),
+	maxDomestic = d3.max(data, function(d){ return d.domestic;}),	
+	minWorld = d3.min(data, function(d){ return d.world;}),
+	maxWorld = d3.max(data, function(d){ return d.world;});
+
+  x.domain([mindate, maxdate]);
+  y.domain([minBudget*0.9, maxBudget*1.2]).nice;	
+  r.domain([minDomestic,minWorld, maxWorld)]);				  			
+
+					</pre></code>
+					<aside class="notes">
+					d3.scale.log().domain(d3.extent(numbers)).range([0,720])
+					function value(d){ return d.value;}
+					var x = d3.scale.linear().domain(d3.extent(objects,value)).range([0,720]);
+					</aside>
+				</section>
+				<section>
+					<h2>Add some style</h2>
+					<pre><code>
+.label {
+  font: 10px sans-serif;
+  fill: steelblue;
+}
+.axis text {
+	font: 10px sans-serif;
+}
+.axis line,
+.axis path {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+.bubble {
+  fill-opacity: .5;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+.bubble :hover {
+  stroke: #000;
+}					  		
+					</code></pre>
+				</section>
+				<section>
+					<h2>Draw circles</h2>
+					<pre><code>
+var elemEnter = svg.append("g")
+		.selectAll("circle").data(data).enter();
+ 
+elemEnter.append("circle")
+		.attr("class", "bubble")
+		.attr("cx", function(d){ return x(d.date); })
+		.attr("cy", function(d){ return y(d.budget); })
+		.attr("r", function(d){ return r(d.domestic);})
+		.style("fill", function(d){ return c(d.domestic);});
+ 
+					</code></pre>
+					<aside class="notes">
+						data() joins the data with selection. enter/exit methods returns the subselections computed in the join
+
+						Appending to enter creates the element
+
+						Now the elements are bound to data, we can then compute attributes
+
+						join is by index. use a key function when referencing data
+					</aside>
+				</section>
+				<section>
+					<h2>Add labels</h2>
+					<pre><code>
+elemEnter.append("text")
+      .attr("class", "label")
+      .attr("x", function(d){ return x(d.date)-5;})
+      .attr("y", function(d){ return y(d.budget)-10;})
+      .attr("text-anchor", "start")
+      .text(function(d){return d.movie;});					  		
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Add axes</h2>
+					<pre><code>
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis);
+	svg.append("g")
+		.attr("class", "y axis")
+		.attr("transform", "translate(" + width + ",0)")
+		.call(yAxis);					  	
+					</code></pre>
+				<aside class="notes">
+				recall that the origin is top left corner. translate moves the origin 
+				</aside>
+				</section>
+				<section>
+					<h2>Add transition between data updates</h2>	
+					<pre><code>
+svg.selectAll("circle").data(movies_data).transition().ease("linear")
+		.attr("r", function(d){ return r(d.world);})
+		.style("fill", function(d){ return c(d.world);})
+					</code></pre>
+				</section>
+			</section>
+			<section>
+				<h2>Summary</h2>
+			</section>
+			<section>
+				<h2>Selections</h2>
+				<ul>
+				<li>A selection is an array of elements</li>
+				<li>After selecting elements, you can apply operators on the elements to get or set attributes, styles, properties, HTML and text</li>
+				<li><code>select</code> selects the first element</li>
+				<li><code>selectAll</code> selects all elements</li>
+				<li><code>append</code> appends new elements and returns a new selection containing the appended elements</li>
+				</ul>
+			</section>
+			<section>
+				<h2>Data</h2>
+				<ul>
+				<li>Data is an array of values or objects</li>
+				<li><code>selection.data()</code> joins the array data with current selection</li>
+				<li><code>Selection.enter()</code> returns the placeholder nodes for each data element that hasn't been added to the current selection. The enter selection merges into the update selection when you append or insert</li>
+				<li><code>selection.exit()</code> returns the exiting selection - the existing DOM elements in the current selection that no new data element was not found. Exit only returns a reference to the exiting selection, does not remove it</li>
+				<li><code>selection.remove()</code> removes the selected element</li>
+
+				</ul>
+				<aside class="notes">
+				data is bound to an element's __data__ property
+				</aside>
+			</section>
+			<section>
+				<h2>Transitions</h2>
+				<ul>
+				<li><code>selection.transition</code> creates animation when changing DOM elements</li>
+				<li>Use <code>delay</code>, <code>duration</code> and <code>ease</code> for simple transitions</li>
+				<li>Use per element <code>delay</code> to create animation based on data or index</li>
+				<li><code>transition.attr(name,value)</code> transitions the value of the attribute to the specified value. The starting value is the current value. Built-in interpolators are automatically selected based on ending value</li>
+				<li><code>transition.style(name,value)</code> transitions the value of the CSS property to the specified value
+				<li>Write custom interpolators using <code>attrTween</code> and <code>styleTween</code></li>
+				<aside class="notes">
+				Transition has default duration of 250ms.
+				transitions interpolate values over time.
+				easing distorts time.
+				transition life cycle: scheduled, starts, runs, ends. 
+				each element transitions independently. 
+				transitions are bound to __transition__ property 
+				</aside>
+			</section>
+			<section>
+				<h2>Shapes</h2>
+				<ul>
+				<li><code>rect</code> is used for bar charts</li>
+				<li><code>arc</code> is used for pie charts and donut charts</li>
+				<li><code>line</code> and <code>path</code> are used for line charts</li>
+				<li><code>circle</code> is often used in different charts</li>
+				</ul>
+			</section>
+			<section>
+				<h2>Layouts</h2>
+				<ul>
+				<li>Layouts generate data</li>
+				<li>Hierachical layouts use the same data format:
+<pre><code>
+var parent = {"children": […]},
+     child = {"value": …};
+</code></pre>
+				</li>
+				</ul>
+			</section>
+			<section>
+				<h4>Top 50 Highest Net Worth Designer</h4>
+				<div id="pack"></div>
+				<div><a href="http://bl.ocks.org/peachyo/2f8991fe5f8b185a002f">View it on bl.ocks.org
+				</a></div>
+				<script>
+(function(){
+
+var margin = 20,
+    diameter = 600;
+
+var color = d3.scale.linear()
+    .domain([-1, 5])
+    .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+    .interpolate(d3.interpolateHcl);
+
+var pack = d3.layout.pack()
+    .padding(2)
+    .size([diameter - margin, diameter - margin])
+    .value(function(d) { return d.net; })
+
+var svg = d3.select("#pack").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+
+d3.json("data/designer.json", function(error, root) {
+  if (error) return console.error(error);
+
+  var focus = root,
+      nodes = pack.nodes(root),
+      view;
+
+  var circle = svg.selectAll("circle")
+      .data(nodes)
+    .enter().append("circle")
+      .attr("class", function(d) { return d.parent ? d.children ? "nodepack" : "nodepack nodepack--leaf" : "nodepack nodepack--root"; })
+      .style("fill", function(d) { return d.children ? color(d.depth) : null; })
+      .on("click", function(d) { 
+      	console.log(d);
+      	if (focus !== d) zoom(d), d3.event.stopPropagation(); });
+
+  var text = svg.selectAll("text")
+      .data(nodes)
+    .enter().append("text")
+      .attr("class", "labelpack")
+      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
+      .style("display", function(d) { return d.parent === root ? null : "none"; })
+      .text(function(d) { return d.name; });
+
+  var node = svg.selectAll("circle,text");
+
+  d3.select("#pack")
+      //.style("background", color(-1))
+      .on("click", function() { zoom(root); });
+
+  zoomTo([root.x, root.y, root.r * 2 + margin]);
+
+  function zoom(d) {
+    var focus0 = focus; focus = d;
+    console.log(d);
+    console.log(focus);
+
+    var transition = d3.transition()
+        .duration(d3.event.altKey ? 7500 : 750)
+        .tween("zoom", function(d) {
+          var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+          return function(t) { zoomTo(i(t)); };
+        });
+
+    transition.selectAll("text")
+      .filter(function(d) { 
+      	console.log(d);
+      	return d.parent === focus || this.style.display === "inline"; })
+        .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
+        .each("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+        .each("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+        
+  }
+
+  function zoomTo(v) {
+    var k = diameter / v[2]; view = v;
+    node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+    circle.attr("r", function(d) { return d.r * k; });
+  }
+});
+
+d3.select(self.frameElement).style("height", diameter + "px");
+
+})()
+
+</script>
+			</section>
+			<section>
+				<h5>Treemap</h5>
+				<img width="960" height="500" src="images/treemap.png" alt="matches">
+				<div><a href="http://bl.ocks.org/peachyo/b84b7362c5d9cd92cb58">View it on bl.ocks.org</a></div>
+			</section>
+			<section>
+				<h5>Tree</h5>
+				<img width="960" height="500" src="images/tree.png" alt="matches">
+				<div><a href="http://bl.ocks.org/peachyo/5f5e40ff9fd2b98376ab">View it on bl.ocks.org</a></div>
+			</section>
+			<section>
+				<h2><a href="https://github.com/mbostock/d3/wiki/API-Reference">D3 API</a></h2>
+				<ul>
+					<li>Core - selections, transitions, data, localization, colors, etc</li>
+					<li>Scales - linear, log, exponetial, quantile, threshold, ordinal</li>
+					<li>SVG - shapes, axes, controls</li>
+					<li>Time - formating, scales, intervals</li>
+					<li>Layouts - bundle, chord, cluster, force, histogram, pack, partition, pie, stack, tree, treemap</li>
+					<li>Geography - paths, projections, streams</li>
+					<li>Geometry - voronoi, quadtree, polygon, hull</li>
+					<li>Behaviors - drag, zoom</li>
+				</ul>
+			</section>
+			<section>
+				<section>
+					<h2>Why data visualization?</h2>
+					<ul>
+						<li>Determine relationships between variables</li>
+						<li>Checking of assumptions</li>
+						<li>Finding hidden patterns</li>
+						<li>Detection of data errors</li>
+					</ul>
+					<aside class="notes">
+					Generally, you work with data using python, R or other tools for data analysis. They all provide tools for plot data. But only you can see the result. With web presentation, you can show your work to others.
+					</aside>
+				</section>
+				<section>
+					<h2>Types of data</h2>
+					<ul>
+						<li>Quantitative data</li>
+						<li>Qualitative data</li>
+						<li>Hierachical data</li>
+					</ul>
+					<aside class="notes">
+					quantitative: time series data, 
+					Even for qualitative data and hierachical data, you still need to quantify the attributes
+					</aside>
+				</section>
+				<section>
+					<h2>Preparing the data</h2>
+					<ul>
+						<li>Cleanse the data</li>
+						<li>Decide how to present the data</li>
+						<li>Rearrange/strucutre the data</li>
+					</ul>
+					<aside class="notes">
+					data is rarely in the exact format needed for visualization. 
+					sort, filter, map. 
+					If the raw data contains larget amount of data, maybe you want to do a summary of the data to prove your assumption. 
+					Or if the data is so large or you are streaming the data, maybe you want to do a sampling of the data so that the it doesn't slow down the web page performance. 
+
+					</aside>
+				</section>
+				<section>
+					<h2>Visualize it</h2>
+					<ul>
+						<li>Pick the right layout that is best for your audience</li>
+						<li>Styling is important but your goal is to make a point with the visualization</li>
+					</ul>
+					<aside class="notes">
+					Sometimes, the most beautiful visualization may not be the best because your audience can not get what you are trying to tell them. 
+					</aside>
+				</section>
+			</section>
+			<section>
+				<section>
+					<h2>Let's try some cool layout</h2>
+					<p>2014 World Cup Matches</p>
+					<img width="800" height="500" src="images/matches.png" alt="matches">
+				</section>
+				<section>
+					<h2>Force Layout</h2>
+					<div id="force"></div>
+					<div><a href="http://bl.ocks.org/peachyo/bf0c710598dbb8d5542d">View it on bl.ocks.org</a></div>
+<script>
+(function(){
+var width = 960,
+    height = 500;
+
+var color = d3.scale.category20();
+
+var force = d3.layout.force()
+    .charge(-120)
+    .linkDistance(50)
+    .size([width, height]);
+
+var svg = d3.select("#force").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var worldcup={
+  "nodes":[
+  {"name":"Germany", "group":"Final"},
+  {"name":"Argentina", "group":"Final"},
+  {"name":"Brazil","group":"Playoff for third-place"},
+  {"name":"Neitherlands","group":"Playoff for third-place"},
+  {"name":"Costa Rica", "group":"Semifinal"},
+  {"name":"Belgium", "group":"Semifinal"},
+  {"name":"France","group": "Semifinal"},
+  {"name":"Colombia","group": "Quarter finals"},
+  {"name":"Switzerland","group":"Quarter finals"},
+  {"name":"USA","group":"Quarter finals"},
+  {"name":"Nigeria","group":"Quarter finals"},
+  {"name":"Algeria","group":"Quarter finals"},
+  {"name":"Mexico","group":"Quarter finals"},
+  {"name":"Greece","group":"Quarter finals"},
+  {"name":"Chile","group":"Quarter finals"},
+  {"name":"Uraguay","group":"Quarter finals"},
+  {"name":"Portugal","group":"Quarter finals"},
+  {"name":"Ghana","group":"Quarter finals"},
+  {"name":"Korea Republic","group":"Round of 16"},
+  {"name":"Russia","group":"Round of 16"},
+  {"name":"Nigeria","group":"Round of 16"},
+  {"name":"Bosnia And Herzegovina","group":"Round of 16"},
+  {"name":"Iran","group":"Round of 16"},
+  {"name":"Honduras","group":"Round of 16"},
+  {"name":"Ecuador","group":"Round of 16"},
+  {"name":"Italy","group":"Round of 16"},
+  {"name":"England","group":"Round of 16"},
+  {"name":"Japan","group":"Round of 16"},
+  {"name":"Cote D'Ivoire","group":"Round of 16"},
+  {"name":"Australia","group":"Round of 16"},
+  {"name":"Spain","group":"Round of 16"},
+  {"name":"Cameroom","group":"Round of 16"},
+  {"name":"Croatia","group":"Round of 16"}
+  ],
+  "links":[
+  {"source":0,"target":1,"value":7},
+  {"source":1,"target":2,"value":9},
+  {"source":1,"target":3,"value":1},
+  {"source":0,"target":2,"value":13},
+  {"source":3,"target":4,"value":1},
+  {"source":2,"target":5,"value":5},
+  {"source":0,"target":6,"value":5},
+  {"source":1,"target":8,"value":4},
+  {"source":5,"target":9,"value":6},
+  {"source":6,"target":10,"value":5},
+  {"source":0,"target":10,"value":6},
+  {"source":3,"target":12,"value":6},
+  {"source":4,"target":13,"value":5},
+  {"source":2,"target":14,"value":5},
+  {"source":7,"target":15,"value":5},
+  {"source":16,"target":17,"value":6},
+  {"source":0,"target":9,"value":3},
+  {"source":5,"target":18,"value":3},
+  {"source":11,"target":19,"values":4},
+  {"source":1,"target":20,"value":7},
+  {"source":21,"target":22,"value":6},
+  {"source":8,"target":23,"value":5},
+  {"source":6,"target":24,"value":2},
+  {"source":15,"target":25,"value":3},
+  {"source":4,"target":26,"value":2},
+  {"source":7,"target":27,"value":7},
+  {"source":13,"target":28,"value":5},
+  {"source":3,"target":14,"value":5},
+  {"source":30,"target":29,"value":5},
+  {"source":2,"target":31,"value":7},
+  {"source":12,"target":32,"value":6},
+  {"source":5,"target":19,"value":3},
+  {"source":11,"target":18,"value":8},
+  {"source":9,"target":16,"value":6},
+  {"source":1,"target":22,"value":3},
+  {"source":0,"target":17,"value":6},
+  {"source":20,"target":21,"value":3},
+  {"source":4,"target":20,"value":3},
+  {"source":6,"target":8,"value":9},
+  {"source":24,"target":23,"value":5},
+  {"source":7,"target":28,"value":5},
+  {"source":15,"target":26,"value":5},
+  {"source":13,"target":27,"value":2},
+  {"source":3,"target":29,"value":6},
+  {"source":15,"target":30,"value":4},
+  {"source":32,"target":31,"value":6},
+  {"source":5,"target":11,"value":5},
+  {"source":2,"target":12,"value":2},
+  {"source":18,"target":19,"value":4},
+  {"source":0,"target":16,"value":6},
+  {"source":20,"target":22,"value":2},
+  {"source":9,"target":17,"value":5},
+  {"source":8,"target":24,"value":5},
+  {"source":6,"target":23,"value":5},
+  {"source":1,"target":21,"value":5},
+  {"source":7,"target":13,"value":5},
+  {"source":4,"target":15,"value":6},
+  {"source":25,"target":26,"value":5},
+  {"source":28,"target":27,"value":5},
+  {"source":12,"target":31,"value":3},
+  {"source":3,"target":30,"value":8},
+  {"source":14,"target":29,"value":6},
+  {"source":2,"target":32,"value":6}
+  ]
+};
+
+force.nodes(worldcup.nodes)
+      .links(worldcup.links)
+      .start();
+
+  var link = svg.selectAll(".link")
+      .data(worldcup.links)
+    .enter().append("line")
+      .attr("class", "linkforce")
+      .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+  var node = svg.selectAll(".node")
+      .data(force.nodes())
+      .enter().append("g")
+      .call(force.drag);
+      
+  node.attr("class", "nodeforce")
+      .append("circle")
+      .attr("r", 5)
+      .style("fill", function(d) { return color(d.group); })
+
+
+  node.append("text")
+  	  .attr("class","textforce")
+      .attr("x","8")
+      .attr("dy","0.31em")
+      .text(function(d) { return d.name; });
+
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("transform",function(d){ 
+      return "translate("+ d.x+","+d.y+")";} );
+
+  });
+
+
+
+})()
+</script>
+				</section>
+				<section>
+				<pre><code>
+{
+  "nodes":[
+  {"name":"Germany", "group":"Final"},
+  {"name":"Argentina", "group":"Final"},
+  {"name":"Brazil","group":"Playoff for third-place"},
+  {"name":"Neitherlands","group":"Playoff for third-place"},
+  {"name":"Costa Rica", "group":"Semifinal"},
+  {"name":"Belgium", "group":"Semifinal"},
+  {"name":"France","group": "Semifinal"},
+  {"name":"Colombia","group": "Quarter finals"},
+  {"name":"Switzerland","group":"Quarter finals"},
+  {"name":"USA","group":"Quarter finals"},
+  {"name":"Nigeria","group":"Quarter finals"},
+  {"name":"Algeria","group":"Quarter finals"},
+  {"name":"Mexico","group":"Quarter finals"},
+  {"name":"Greece","group":"Quarter finals"},
+  {"name":"Chile","group":"Quarter finals"},
+  {"name":"Uraguay","group":"Quarter finals"},
+  {"name":"Portugal","group":"Quarter finals"},
+  {"name":"Ghana","group":"Quarter finals"},
+  {"name":"Korea Republic","group":"Round of 16"},
+  {"name":"Russia","group":"Round of 16"},
+  {"name":"Nigeria","group":"Round of 16"},
+  {"name":"Bosnia And Herzegovina","group":"Round of 16"},
+  {"name":"Iran","group":"Round of 16"},
+  {"name":"Honduras","group":"Round of 16"},
+  {"name":"Ecuador","group":"Round of 16"},
+  {"name":"Italy","group":"Round of 16"},
+  {"name":"England","group":"Round of 16"},
+  {"name":"Japan","group":"Round of 16"},
+  {"name":"Cote D'Ivoire","group":"Round of 16"},
+  {"name":"Australia","group":"Round of 16"},
+  {"name":"Spain","group":"Round of 16"},
+  {"name":"Cameroom","group":"Round of 16"},
+  {"name":"Croatia","group":"Round of 16"}
+  ],
+  "links":[
+  {"source":0,"target":1,"value":7},
+  {"source":1,"target":2,"value":9},
+  {"source":1,"target":3,"value":1},
+  {"source":0,"target":2,"value":13},
+  {"source":3,"target":4,"value":1},
+  {"source":2,"target":5,"value":5},
+  {"source":0,"target":6,"value":5},
+  {"source":1,"target":8,"value":4},
+  {"source":5,"target":9,"value":6},
+  {"source":6,"target":10,"value":5},
+  {"source":0,"target":10,"value":6},
+  {"source":3,"target":12,"value":6},
+  {"source":4,"target":13,"value":5},
+  {"source":2,"target":14,"value":5},
+  {"source":7,"target":15,"value":5},
+  {"source":16,"target":17,"value":6},
+  {"source":0,"target":9,"value":3},
+  {"source":5,"target":18,"value":3},
+  {"source":11,"target":19,"values":4},
+  {"source":1,"target":20,"value":7},
+  {"source":21,"target":22,"value":6},
+  {"source":8,"target":23,"value":5},
+  {"source":6,"target":24,"value":2},
+  {"source":15,"target":25,"value":3},
+  {"source":4,"target":26,"value":2},
+  {"source":7,"target":27,"value":7},
+  {"source":13,"target":28,"value":5},
+  {"source":3,"target":14,"value":5},
+  {"source":30,"target":29,"value":5},
+  {"source":2,"target":31,"value":7},
+  {"source":12,"target":32,"value":6},
+  {"source":5,"target":19,"value":3},
+  {"source":11,"target":18,"value":8},
+  {"source":9,"target":16,"value":6},
+  {"source":1,"target":22,"value":3},
+  {"source":0,"target":17,"value":6},
+  {"source":20,"target":21,"value":3},
+  {"source":4,"target":20,"value":3},
+  {"source":6,"target":8,"value":9},
+  {"source":24,"target":23,"value":5},
+  {"source":7,"target":28,"value":5},
+  {"source":15,"target":26,"value":5},
+  {"source":13,"target":27,"value":2},
+  {"source":3,"target":29,"value":6},
+  {"source":15,"target":30,"value":4},
+  {"source":32,"target":31,"value":6},
+  {"source":5,"target":11,"value":5},
+  {"source":2,"target":12,"value":2},
+  {"source":18,"target":19,"value":4},
+  {"source":0,"target":16,"value":6},
+  {"source":20,"target":22,"value":2},
+  {"source":9,"target":17,"value":5},
+  {"source":8,"target":24,"value":5},
+  {"source":6,"target":23,"value":5},
+  {"source":1,"target":21,"value":5},
+  {"source":7,"target":13,"value":5},
+  {"source":4,"target":15,"value":6},
+  {"source":25,"target":26,"value":5},
+  {"source":28,"target":27,"value":5},
+  {"source":12,"target":31,"value":3},
+  {"source":3,"target":30,"value":8},
+  {"source":14,"target":29,"value":6},
+  {"source":2,"target":32,"value":6}
+  ]
+}				
+				</code></pre>
+				</section>
+				<section>
+					<h2>Bundle Layout</h2>
+					<div id="bundle"></div>
+					<div><a href="http://bl.ocks.org/peachyo/4983b1683c7d4ba5e612">View it on bl.ocks.org</a></div>
+<script>
+
+(function(){
+ 
+var diameter = 550,
+    radius = diameter / 2,
+    innerRadius = radius - 80;
+ 
+var cluster = d3.layout.cluster()
+    .size([360, innerRadius])
+    .sort(null)
+    .value(function(d) { return d.size; });
+ 
+var bundle = d3.layout.bundle();
+ 
+var line = d3.svg.line.radial()
+    .interpolate("bundle")
+    .tension(.85)
+    .radius(function(d) { return d.y; })
+    .angle(function(d) { return d.x / 180 * Math.PI; });
+ 
+var svg = d3.select("#bundle").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(" + radius + "," + radius + ")");
+ 
+var link = svg.append("g").selectAll(".link"),
+    node = svg.append("g").selectAll(".node");
+ 
+d3.json("data/wc.json", function(error, classes) {
+  var nodes = cluster.nodes(packageHierarchy(classes)),
+      links = packageImports(nodes);
+ 
+  link = link
+      .data(bundle(links))
+    .enter().append("path")
+      .each(function(d) { d.source = d[0], d.target = d[d.length - 1]; })
+      .attr("class", "link")
+      .attr("d", line);
+ 
+  node = node
+      .data(nodes.filter(function(n) { return !n.children; }))
+    .enter().append("text")
+      .attr("class", "node")
+      .attr("dy", ".31em")
+      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + (d.y + 8) + ",0)" + (d.x < 180 ? "" : "rotate(180)"); })
+      .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+      .text(function(d) { return d.key; })
+      .on("mouseover", mouseovered)
+      .on("mouseout", mouseouted);
+});
+ 
+function mouseovered(d) {
+  node
+      .each(function(n) { n.target = n.source = false; });
+ 
+  link
+      .classed("link--target", function(l) { if (l.target === d) return l.source.source = true; })
+      .classed("link--source", function(l) { if (l.source === d) return l.target.target = true; })
+    .filter(function(l) { return l.target === d || l.source === d; })
+      .each(function() { this.parentNode.appendChild(this); });
+ 
+  node
+      .classed("node--target", function(n) { return n.target; })
+      .classed("node--source", function(n) { return n.source; });
+}
+ 
+function mouseouted(d) {
+ 
+  link
+      .classed("link--target", false)
+      .classed("link--source", false);
+ 
+  node
+      .classed("node--target", false)
+      .classed("node--source", false);
+}
+ 
+d3.select(self.frameElement).style("height", diameter + "px");
+ 
+// Lazily construct the package hierarchy from class names.
+function packageHierarchy(classes) {
+  var map = {};
+ 
+  function find(name, data) {
+    var node = map[name], i;
+    if (!node) {
+      node = map[name] = data || {name: name, children: []};
+      if (name.length) {
+        node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
+        node.parent.children.push(node);
+        node.key = name.substring(i + 1);
+      }
+    }
+    return node;
+  }
+ 
+  classes.forEach(function(d) {
+    find(d.name, d);
+  });
+ 
+  return map[""];
+}
+ 
+// Return a list of imports for the given array of nodes.
+function packageImports(nodes) {
+  var map = {},
+      match = [];
+ 
+  // Compute a map from name to node.
+  nodes.forEach(function(d) {
+    map[d.name] = d;
+  });
+ 
+  // For each import, construct a link from the source to target node.
+  nodes.forEach(function(d) {
+    if (d.match) d.match.forEach(function(i) {
+      match.push({source: map[d.name], target: map[i]});
+    });
+  });
+ 
+  return match;
+}
+})()
+</script>				
+				</section>
+				<section>
+				<pre><code>
+[
+  {"name":"Germany", "match":["Argentina","Brazil","France","USA","Nigeria","Portugal","Ghana"]},
+  {"name":"Argentina", "match":["Brazil","Neitherlands","Switzerland","Nigeria","Bosnia And Herzegovina","Iran"]},
+  {"name":"Brazil", "match":["Belgium","Mexico","Chile","Cameroom","Croatia"]},
+  {"name":"Neitherlands", "match":["Costa Rica","Mexico","Chile","Australia","Spain"]},
+  {"name":"Costa Rica", "match":["Greece","Italy","Uraguay"]},
+  {"name":"Belgium", "match":["USA","Algeria","Korea Republic","Russia"]},
+  {"name":"France", "match":["Greece","Uraguay","Nigeria","England"]},
+  {"name":"Colombia", "match":["Greece","Uraguay","Japan","Cote D'Ivoire"]},
+  {"name":"Switzerland", "match":["Honduras","Ecuador"]},
+  {"name":"USA", "match":["Portugal","Ghana"]},
+  {"name":"Nigeria", "match":["Iran","Bosnia And Herzegovina"]},
+  {"name":"Algeria", "match":["Korea Republic","Russia"]},
+  {"name":"Mexico", "match":["Cameroom","Croatia"]},
+  {"name":"Greece", "match":["Japan","Cote D'Ivoire"]},
+  {"name":"Chile", "match":["Australia"]},
+  {"name":"Uraguay", "match":["Italy","England"]},
+  {"name":"Portugal", "match":["Ghana"]},
+  {"name":"Ghana", "match":[]},
+  {"name":"Korea Republic", "match":["Russia"]},
+  {"name":"Russia", "match":[]},
+  {"name":"Bosnia And Herzegovina", "match":["Iran"]},
+  {"name":"Iran", "match":[]},
+  {"name":"Honduras", "match":[]},
+  {"name":"Ecuador", "match":["Honduras"]},
+  {"name":"Italy", "match":["England"]},
+  {"name":"England", "match":[]},
+  {"name":"Japan", "match":[]},
+  {"name":"Cote D'Ivoire", "match":["Japan"]},
+  {"name":"Australia", "match":[]},
+  {"name":"Spain", "match":["Australia"]},
+  {"name":"Cameroom", "match":[]},
+  {"name":"Croatia", "match":["Cameroom"]}
+]					
+				</code></pre>
+				</section>
+				<section>
+					<h2>Chord Layout</h2>
+					<div id="chord"></div>
+					<div id="tooltip"></div>
+					<div><a href="http://bl.ocks.org/peachyo/4f6ed17df8459f5fe216">View it on bl.ocks.org</a></div>
+<script>
+(function(){
+var width = 720,
+height = 550,
+outerRadius = Math.min(width, height) / 2 - 10,
+innerRadius = outerRadius - 24;
+ 
+var formatPercent = d3.format(".1%");
+ 
+var arc = d3.svg.arc()
+			.innerRadius(innerRadius)
+			.outerRadius(outerRadius);
+ 
+var layout = d3.layout.chord()
+			.padding(.04)
+			.sortSubgroups(d3.descending)
+			.sortChords(d3.ascending);
+ 
+var path = d3.svg.chord()
+			.radius(innerRadius);
+ 
+var svg = d3.select("#chord").append("svg")
+			.attr("width", width)
+			.attr("height", height)
+			.append("g")
+			.attr("id", "circle")
+			.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+ 
+svg.append("circle")
+		.attr("r", outerRadius);
+ 
+d3.csv("data/teams.csv", function(cities) {
+ 
+	d3.json("data/matrix.json", function(matrix) {
+ 
+	// Compute the chord layout.
+	layout.matrix(matrix);
+ 
+	// Add a group per neighborhood.
+	var group = svg.selectAll(".group")
+		.data(layout.groups)
+		.enter().append("g")
+		.attr("class", "group")
+		.on("mouseover", mouseover);
+ 
+	// Add the group arc.
+	var groupPath = group.append("path")
+		.attr("id", function(d, i) { return "group" + i; })
+		.attr("d", arc)
+		.style("fill", function(d, i) { return cities[i].color; });
+ 
+	// Add a text label.
+	var groupText = group.append("text")
+			.attr("class","textforce")
+			.attr("x", 6)
+			.attr("dy", 10);
+ 
+	groupText.append("textPath")
+			.attr("xlink:href", function(d, i) { return "#group" + i; })
+			.text(function(d, i) { return cities[i].name; });
+ 
+// Remove the labels that don't fit. :(
+groupText.filter(function(d, i) { return groupPath[0][i].getTotalLength() / 2 - 16 < this.getComputedTextLength(); })
+		.remove();
+ 
+	// Add the chords.
+	var chord = svg.selectAll(".chord")
+		.data(layout.chords)
+		.enter().append("path")
+		.attr("class", "chord")
+		.style("fill", function(d) { 
+		return cities[d.source.index].color; })
+		.attr("d", path)
+		.on("mouseover", mouseoverd)
+		.on("mouseout", mouseouted);
+ 
+function mouseoverd(d, i) {
+ 
+	d3.select("#tooltip")
+                    .style("visibility", "visible")
+                    .html(cities[d.source.index].name
+ 						+ "-" + cities[d.target.index].name
+						 + ": " + d.source.value  + "-" + d.target.value)
+                    .style("top", function () { return (d3.event.pageY-30)+"px"})
+                    .style("left", function () { return (d3.event.pageX)+"px";});
+ 
+}
+ 
+ 
+function mouseouted(d) {
+  d3.select("#tooltip").style("visibility", "hidden");
+}
+ 
+function mouseover(d,i){
+	chord.classed("fade", function(p) {
+		return p.source.index != i && p.target.index != i;
+	});
+}
+ 
+});
+});
+ 
+
+})()
+</script>
+				</section>
+				<section>
+				<h2>Match Matrix</h2>
+				<pre><code>
+[
+[0,1,0,7,0,0,0,1,1,0,2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0], 
+[0,0,0,0,0,1,0,0,0,1,0,3,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0], 
+[0,0,0,3,0,0,0,0,0,0,0,0,0,2,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,3],
+[0,0,0,0,0,0,0,0,0,0,0,0,1,0,3,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0],
+[0,0,0,0,0,0,0,0,2,0,2,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,1,0,0,0,0,0,0,0,0,3,0,2,0,0,0,0,0,0,0,0,0,2,4,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,5,0,2,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2,3,0,0,0,0,0,0,0,0,0,0],
+[1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0],
+[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,3],
+[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0],
+[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,2,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0],
+[2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],
+[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0],
+[0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0],
+[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0],
+[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+[0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0]
+]
+					</code></pre>
+				</section>
+			</section>
+			<section data-background="#4d7e65">
+				<h2 style="color:#fff">Q&A</h2>
+			</section>
+			</div>
+
+		</div>
+
+		<script src="assets/js/vendor/head.min.js"></script>
+		<script src="assets/js/vendor/reveal.min.js"></script>
+		<script>
+
+// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
+				multiplex: {
+					secret: 'null', // Obtained from the socket.io server. Gives this (the master) control of the presentation
+					id: '1032989a7f7d552f', // Obtained from socket.io server
+					url: 'revealjs.jit.su:80' // Location of socket.io server
+				},
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.10/socket.io.min.js', async: true },
+					{ src: 'assets/js/plugin/multiplex/client.js', async: true },
+					{ src: 'assets/js/vendor/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'assets/js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'assets/js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'assets/js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'assets/js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'assets/js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+			
+		</script>
+
+	</body>
+</html>

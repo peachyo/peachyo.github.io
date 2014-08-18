@@ -1,0 +1,103 @@
+{
+ "name": "designers",
+ "children": [
+    {"name":"American",
+        "children":[
+            {"name":"Ralph Lauren","net":7300},
+            {"name":"Diane Von Furstenberg","net":1200},
+            {"name":"Michael Kors","net":1000},
+            {"name":"Tory Burch","net":1000},
+            {"name":"Calvin Klein","net":700},
+            {"name":"George Gillett","net":700},
+            {"name":"Donna Karan","net":400},
+            {"name":"Jasper Johns","net":300},
+            {"name":"Tommy Hilfiger","net":250},
+            {"name":"Kate Spade","net":200},
+            {"name":"Robert Duffy","net":135},
+            {"name":"Steve Madden","net":120},
+            {"name":"Ben Chichoski","net":120},
+            {"name":"Vera Wang","net":115},
+            {"name":"Caolina Herrera","net":100},
+            {"name":"Willie G Davidson","net":100},
+            {"name":"Aroness Monica von Neumann","net":100},
+            {"name":"Marc Jacobs","net":100},
+            {"name":"Kenneth Cole","net":100},
+            {"name":"Ralph Rucci","net":75}
+        ]
+    },
+    {"name":"Italian",
+        "children":[
+            {"name":"Miuccia Prada","net":11100},
+            {"name":"Giorgio Armani","net":9600},
+            {"name":"Patrizio Bertelli","net":5200},
+            {"name":"Stefano Gabbana","net":1700},
+            {"name":"Valentino Garavani","net":1500},
+            {"name":"Allegra Versace","net":800},
+            {"name":"Roberto Cavalli","net":500},
+            {"name":"Donatella Versace","net":200}
+        ]
+    },
+    {"name":"British",
+        "children":[
+            {"name":"Christian Candy","net":1100},
+            {"name":"Stephan Marks","net":400},
+            {"name":"Tamara Mellon","net":180},
+            {"name":"Jonathan Ive","net":130},
+            {"name":"Daphne Guinness","net":100},
+            {"name":"Stella McCartney","net":75}
+        ]
+    },
+    {"name":"French",
+        "children":[
+            {"name":"Pierre Cardin","net":723},
+            {"name":"Paloma Picasso","net":600},
+            {"name":"Jerome Dahan","net":300},
+            {"name":"Christian Audigier","net":250},
+            {"name":"Herve Leger","net":87},
+            {"name":"Christian Louboutin","net":85}
+        ]
+    },
+    {"name":"Spanish",
+        "children":[
+            {"name":"Manolo Blahnik","net":200}
+        ]
+    },
+    {"name":"Swedish",
+        "children":[
+            {"name":"Markus Persson AKA Notch","net":150}
+        ]
+    },
+    {"name":"German",
+        "children":[
+            {"name":"Karl Lagerfeld","net":125}
+        ]
+    }
+    ,
+    {"name":"Japan",
+        "children":[
+            {"name":"SATOSHI NAKAMOTO","net":400}
+        ]
+    }
+    ,
+    {"name":"Indian",
+        "children":[
+            {"name":"Anish Kapoor","net":700}
+        ]
+    },
+    {"name":"Canadian",
+        "children":[
+            {"name":"Peter Nygard","net":900}
+        ]
+    },
+    {"name":"Romanian",
+        "children":[
+            {"name":"SATOSHI NAKAMOTO","net":400}
+        ]
+    },
+    {"name":"Dominican Republican",
+        "children":[
+            {"name":"Edith Flagg","net":100}
+        ]
+    }
+  ]
+}

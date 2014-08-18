@@ -1,0 +1,13 @@
+# Site navigation links
+
+- title: Posts
+  url: /posts/
+
+- title: Talks
+  url: /talks/
+
+- title: Articles
+  url: /articles/
+
+- title: Work In Progress
+  url: /wip/

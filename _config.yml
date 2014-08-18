@@ -2,8 +2,8 @@
 
 title:            Make~Create~Innovate
 locale:           en_US
-# url:              http://localhost:4000
-# {% highlight yaml %} url: http://peachyo.github.io url: http://localhost:4000 url: {% endhighlight %}
+#url:              http://localhost:4000
+url:              http://peachyo.github.io
 
 
 # Jekyll configuration

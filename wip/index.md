@@ -1,6 +1,6 @@
 ---
 layout: page
-title: work in progress
+title: Work in Progress
 tags: [stock option, trading, python]
 modified: 2014-08-08T20:53:07.573882-04:00
 comments: false

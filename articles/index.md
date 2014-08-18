@@ -1,6 +1,6 @@
 ---
 layout: page
-title: articles
+title: Articles
 tags: [probabilistic data structure]
 modified: 2014-08-08T20:53:07.573882-04:00
 comments: false
@@ -9,6 +9,7 @@ image:
   credit: Texture Lovers
   creditlink: http://texturelovers.com
 ---
+
 
 <h2>Introduction to Probabilistic Data Structures</h2>
 <section id="table-of-contents" class="toc">

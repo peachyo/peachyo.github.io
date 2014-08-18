@@ -1,6 +1,6 @@
 ---
 layout: page
-title: talks
+title: Talks
 tags: [d3, data visualization]
 modified: 2014-08-08T20:53:07.573882-04:00
 comments: false

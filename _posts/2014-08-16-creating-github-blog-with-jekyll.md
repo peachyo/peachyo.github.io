@@ -33,12 +33,7 @@ After making changes, you must do <code>build</code> <code>serve</code> again to
 ### Deploy to github
 
 1. Create a new repository yourusername.github.io
-2. In your local directory, do 
-	git init .
-	git add .
-	git commit -m "jekyll blog"
-	git add remote origin master https://github.com/yourusername/yourusername.github.io.git
-	git push 
+2. Push your local file to github
 
 
 

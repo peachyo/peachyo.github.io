@@ -12,7 +12,7 @@ image:
 
 In this paper "[Informed Options Trading prior to M&A Announcements:Insider Trading?](http://irrcinstitute.org/pdf/Informed-Options-Trading_June-12-2014.pdf)", the authors investigated informed trading activity in equity options prior to the announcement of corporate mergers and acquisitions (M&A).
 
-Their finding are not quite surprising: 
+Their findings are not quite surprising: 
 
 - abnormal option trading volumne, particularly for OTM calls, sometimes ITM puts(synthetic long stock)
 - volume is significantly higher for short and medium-dated options 
@@ -24,4 +24,4 @@ There are some methods that they used for data processing are quite useful. For 
 
 It will be interesting to build an option screening program. The problem with option data is that it's difficult to obtain the data and for each stock at any given date, there will be a lot of option data for different strikes and expiration dates. 
 
-So far, I've only finished the data scraping part. There are lots of things need to be done. It's easy to get lost and give up when you work on your own...
+So far, I've only finished the data scraping part. There are lots of things need to be done. Python is great for quick prototyping. I tried MongoDB first because I started with Google finance API and the data was already in json format. But google blocks you if you send requests with many threads. So I had to switch to webpage scraping. Also Google finance does not show options for ETFs, very strange. I was able to download daily data in about 10 minutes. However, the Mongo DB size grows so fast that I am looking to switch to mysql, flat file or pytable. Simple is good. 

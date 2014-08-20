@@ -2,8 +2,7 @@
 layout: post
 title: "Create Github Blog with Jekyll"
 modified:
-excerpt: "How to create github blog with Jekyll."
-tags: []
+tags: [jekyll,blog]
 ---
 
 After spending the whole weekend playing with jekyll, I finally got it working properly. If you follow these steps it will save you a lot more time. 
